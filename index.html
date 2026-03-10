@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Long — Blog</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  min-height: 100vh;
+  background: #0e0e0e;
+  overflow: hidden;
+  font-family: 'Instrument Sans', sans-serif;
+  cursor: none;
+}
+
+/* Custom cursor */
+.cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease, background 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.4s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+
+/* Split layout */
+.split {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.panel {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: flex 0.7s cubic-bezier(0.76, 0, 0.24, 1);
+  cursor: none;
+}
+
+.split:hover .panel { flex: 0.6; }
+.panel:hover { flex: 1.4 !important; }
+
+/* LIFE panel */
+.panel-life {
+  background: #f7f3ec;
+}
+
+.panel-life::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 30% 40%, rgba(210,190,160,0.4), transparent),
+    radial-gradient(ellipse 60% 80% at 70% 70%, rgba(180,160,130,0.2), transparent);
+}
+
+/* Grain on life */
+.panel-life::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* WORK panel */
+.panel-work {
+  background: #080c10;
+}
+
+.panel-work::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Divider */
+.divider {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  width: 1px;
+  height: 60px;
+  background: rgba(128,128,128,0.3);
+  transition: opacity 0.4s;
+}
+
+/* Content */
+.panel-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 40px;
+}
+
+/* LIFE content */
+.life-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(80,60,40,0.5);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: rise 1s ease 0.3s forwards;
+}
+
+.life-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 300;
+  color: #2a1f12;
+  line-height: 1;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+  opacity: 0;
+  animation: rise 1s ease 0.5s forwards;
+}
+
+.life-title em {
+  font-style: italic;
+  color: #7a5c3a;
+}
+
+.life-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: rgba(60,40,20,0.5);
+  line-height: 1.6;
+  max-width: 260px;
+  margin: 0 auto 36px;
+  opacity: 0;
+  animation: rise 1s ease 0.7s forwards;
+}
+
+.btn-life {
+  display: inline-block;
+  padding: 12px 32px;
+  border: 1px solid rgba(80,60,40,0.3);
+  color: #3a2a15;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-style: italic;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: all 0.4s ease;
+  opacity: 0;
+  animation: rise 1s ease 0.9s forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-life::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: #7a5c3a;
+  transition: width 0.4s ease;
+}
+
+.btn-life:hover { border-color: #7a5c3a; color: #7a5c3a; }
+.btn-life:hover::before { width: 100%; }
+
+/* Decorative elements for Life */
+.life-deco {
+  position: absolute;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: rgba(80,60,40,0.08);
+  font-size: 140px;
+  font-weight: 300;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+}
+.life-deco-1 { top: 10%; left: -5%; }
+.life-deco-2 { bottom: 5%; right: -2%; font-size: 100px; }
+
+/* WORK content */
+.work-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(0,255,136,0.4);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: rise 1s ease 0.4s forwards;
+}
+
+.work-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(40px, 5vw, 68px);
+  font-weight: 300;
+  color: #e8f4e8;
+  line-height: 1;
+  letter-spacing: -2px;
+  margin-bottom: 16px;
+  opacity: 0;
+  animation: rise 1s ease 0.6s forwards;
+}
+
+.work-title .accent { color: #00ff88; }
+
+.work-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(0,255,136,0.4);
+  line-height: 1.8;
+  max-width: 280px;
+  margin: 0 auto 36px;
+  opacity: 0;
+  animation: rise 1s ease 0.8s forwards;
+}
+
+.work-sub .comment { color: rgba(0,255,136,0.25); }
+
+.btn-work {
+  display: inline-block;
+  padding: 11px 28px;
+  border: 1px solid rgba(0,255,136,0.3);
+  color: #00ff88;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  opacity: 0;
+  animation: rise 1s ease 1s forwards;
+  position: relative;
+}
+
+.btn-work::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,255,136,0.05);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.btn-work:hover { border-color: #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+.btn-work:hover::before { transform: scaleX(1); }
+
+/* Terminal blink */
+.blink {
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+  color: #00ff88;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Work decorative */
+.work-deco {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(0,255,136,0.06);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1.8;
+  text-align: left;
+}
+.work-deco-1 { top: 8%; left: 5%; }
+.work-deco-2 { bottom: 8%; right: 5%; text-align: right; }
+
+
+@keyframes rise {
+  from { opacity:0; transform: translateY(16px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+/* Hover state - cursor changes */
+.panel-life:hover ~ * .cursor { background: #7a5c3a; }
+.panel-work:hover ~ * .cursor { background: #00ff88; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="ring"></div>
+
+<div class="split">
+  <!-- LIFE -->
+  <div class="panel panel-life" id="panel-life">
+    <div class="life-deco life-deco-1">sống</div>
+    <div class="life-deco life-deco-2">thơ</div>
+    <div class="panel-content">
+      <div class="life-label">// workspace · one</div>
+      <h2 class="life-title">Đời<br><em>Sống</em></h2>
+      <p class="life-sub" id="life-sub">Những suy nghĩ nhỏ về những điều lớn. Ghi chú của một kẻ hay để ý.</p>
+      <a href="/life" class="btn-life" id="btn-life">Vào không gian này →</a>
+    </div>
+  </div>
+
+  <!-- WORK -->
+  <div class="panel panel-work" id="panel-work">
+    <div class="work-deco work-deco-1">
+      const life = require('./experience');<br>
+      // building things that matter<br>
+      function think() {'{...}'}<br>
+      export default curiosity;
+    </div>
+    <div class="work-deco work-deco-2">
+      // v2.0 — always_learning<br>
+      git commit -m "another day"<br>
+      > shipped ✓
+    </div>
+    <div class="panel-content">
+      <div class="work-label">// workspace · two</div>
+      <h2 class="work-title"><span class="accent">{</span>Work<span class="accent">}</span></h2>
+      <p class="work-sub" id="work-sub">
+        <span class="comment">/* code, systems,</span><br>
+        <span class="comment" id="work-sub-2">   và những thứ geek */</span>
+      </p>
+      <a href="/work" class="btn-work">cd ./work<span class="blink">_</span></a>
+    </div>
+  </div>
+</div>
+
+<div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);z-index:200;display:flex;align-items:center;gap:6px;opacity:0;animation:rise 1s ease 1.5s forwards">
+  <button onclick="setLang('vi')" id="idx-btn-vi" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;padding:3px 7px;border:1px solid rgba(128,128,128,0.2);border-radius:3px;background:none;color:rgba(128,128,128,0.5);cursor:pointer;transition:all 0.2s">VI</button>
+  <span style="color:rgba(128,128,128,0.2);font-size:9px">/</span>
+  <button onclick="setLang('en')" id="idx-btn-en" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;padding:3px 7px;border:1px solid transparent;border-radius:3px;background:none;color:rgba(128,128,128,0.3);cursor:pointer;transition:all 0.2s">EN</button>
+</div>
+<a href="/admin" style="position:fixed;bottom:20px;right:20px;z-index:200;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(128,128,128,0.25);text-decoration:none;text-transform:uppercase;transition:color 0.3s" onmouseover="this.style.color='rgba(128,128,128,0.6)'" onmouseout="this.style.color='rgba(128,128,128,0.25)'">admin</a>
+
+<script>
+const UI = {
+  vi: {
+    lifeSub: 'Những suy nghĩ nhỏ về những điều lớn. Ghi chú của một kẻ hay để ý.',
+    lifeBtn: 'Vào không gian này →',
+    workSub2: '   và những thứ geek */',
+    authorTag: 'Long · Personal Blog · 2025',
+  },
+  en: {
+    lifeSub: 'Small thoughts on big things. Notes from someone who notices.',
+    lifeBtn: 'Enter this space →',
+    workSub2: '   and geeky stuff */',
+    authorTag: 'Long · Personal Blog · 2025',
+  }
+};
+
+let currentLang = localStorage.getItem('blog-lang') || 'vi';
+
+function applyUILang(lang) {
+  const s = UI[lang] || UI.vi;
+  const q = id => document.getElementById(id);
+  if (q('life-sub')) q('life-sub').textContent = s.lifeSub;
+  if (q('btn-life')) q('btn-life').textContent = s.lifeBtn;
+  if (q('work-sub-2')) q('work-sub-2').textContent = s.workSub2;
+  // Update lang toggle buttons
+  const btnVi = q('idx-btn-vi');
+  const btnEn = q('idx-btn-en');
+  if (btnVi) {
+    btnVi.style.borderColor = lang === 'vi' ? 'rgba(128,128,128,0.5)' : 'transparent';
+    btnVi.style.color = lang === 'vi' ? 'rgba(128,128,128,0.8)' : 'rgba(128,128,128,0.3)';
+  }
+  if (btnEn) {
+    btnEn.style.borderColor = lang === 'en' ? 'rgba(128,128,128,0.5)' : 'transparent';
+    btnEn.style.color = lang === 'en' ? 'rgba(128,128,128,0.8)' : 'rgba(128,128,128,0.3)';
+  }
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('blog-lang', lang);
+  applyUILang(lang);
+}
+
+applyUILang(currentLang);
+
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+});
+
+function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+// Change cursor color based on panel hover
+document.getElementById('panel-life').addEventListener('mouseenter', () => {
+  cursor.style.background = '#7a5c3a';
+  ring.style.borderColor = 'rgba(122,92,58,0.4)';
+});
+document.getElementById('panel-work').addEventListener('mouseenter', () => {
+  cursor.style.background = '#00ff88';
+  ring.style.borderColor = 'rgba(0,255,136,0.4)';
+});
+document.querySelectorAll('.panel').forEach(p => {
+  p.addEventListener('mouseleave', () => {
+    cursor.style.background = '#fff';
+    ring.style.borderColor = 'rgba(255,255,255,0.3)';
+  });
+});
+
+// Expand ring on links
+document.querySelectorAll('a').forEach(a => {
+  a.addEventListener('mouseenter', () => {
+    ring.style.width = '60px'; ring.style.height = '60px';
+  });
+  a.addEventListener('mouseleave', () => {
+    ring.style.width = '36px'; ring.style.height = '36px';
+  });
+});
+</script>
+</body>
+</html>

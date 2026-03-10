@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Long Blog</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/turndown@7.2.0/dist/turndown.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2430;
+  --border: #21262d;
+  --border-dim: #30363d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --text-muted: #484f58;
+  --green: #3fb950;
+  --blue: #58a6ff;
+  --red: #f85149;
+  --yellow: #d29922;
+  --orange: #db6d28;
+  --purple: #bc8cff;
+  --life-accent: #b8860b;
+  --work-accent: #3fb950;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── LOGIN OVERLAY ── */
+#login-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.login-box {
+  width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px;
+}
+
+.login-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.login-logo span { color: var(--green); }
+
+.login-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.login-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+}
+
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--blue); }
+.form-input::placeholder { color: var(--text-muted); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.btn-primary { background: var(--green); color: #0d1117; font-weight: 600; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-danger { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+.btn-danger:hover { background: rgba(248,81,73,0.25); }
+.btn-secondary { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border-dim); }
+.btn-secondary:hover { color: var(--text); border-color: var(--border); }
+.btn-ghost { background: none; color: var(--text-dim); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); }
+.btn-full { width: 100%; justify-content: center; }
+
+.login-error {
+  display: none;
+  background: rgba(248,81,73,0.1);
+  border: 1px solid rgba(248,81,73,0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: var(--red);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* ── MAIN LAYOUT ── */
+#app { display: none; height: 100vh; flex-direction: column; }
+#app.visible { display: flex; }
+
+/* Header */
+.app-header {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.header-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-brand .prompt { color: var(--green); }
+.header-brand .name { color: var(--text); }
+.header-brand .sep { color: var(--text-muted); }
+.header-brand .page { color: var(--text-dim); }
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+.header-site-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+.header-site-link:hover { color: var(--text-dim); }
+
+/* Body */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: 16px 12px 8px;
+}
+
+.sidebar-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+  color: var(--text-dim);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(88,166,255,0.1); color: var(--blue); }
+.nav-item .icon { font-size: 14px; width: 18px; text-align: center; }
+
+.sidebar-badge {
+  margin-left: auto;
+  background: var(--surface2);
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+/* ── PANELS ── */
+.panel { display: none; padding: 32px; }
+.panel.active { display: block; }
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-title-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Stats row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* Posts table */
+.posts-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.posts-table-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.table-search {
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 7px 12px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  outline: none;
+  width: 240px;
+  transition: border-color 0.2s;
+}
+.table-search:focus { border-color: var(--blue); }
+.table-search::placeholder { color: var(--text-muted); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 12px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+
+.td-title {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+  max-width: 360px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.td-workspace {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.ws-life { color: #b8860b; }
+.ws-work { color: var(--green); }
+
+.td-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.status-published { background: rgba(63,185,80,0.1); color: var(--green); border: 1px solid rgba(63,185,80,0.25); }
+.status-draft { background: rgba(139,148,158,0.1); color: var(--text-muted); border: 1px solid rgba(139,148,158,0.2); }
+.status-featured { background: rgba(184,134,11,0.1); color: #d4a017; border: 1px solid rgba(184,134,11,0.25); }
+
+.td-actions { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+
+.action-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.15s;
+}
+.action-edit { border-color: var(--border-dim); color: var(--text-dim); background: none; }
+.action-edit:hover { border-color: var(--blue); color: var(--blue); background: rgba(88,166,255,0.08); }
+.action-delete { border-color: transparent; color: var(--text-muted); background: none; }
+.action-delete:hover { border-color: rgba(248,81,73,0.3); color: var(--red); background: rgba(248,81,73,0.08); }
+
+.empty-table {
+  text-align: center;
+  padding: 48px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ── EDITOR PANEL ── */
+.editor-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.editor-main {}
+.editor-sidebar {}
+
+.editor-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.editor-card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.editor-card-body { padding: 20px; }
+
+.field-group { margin-bottom: 18px; }
+.field-group:last-child { margin-bottom: 0; }
+
+.field-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.field-input, .field-select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.field-input:focus, .field-select:focus { border-color: var(--blue); }
+.field-input::placeholder { color: var(--text-muted); }
+.field-select { appearance: none; cursor: pointer; }
+.field-select option { background: var(--surface2); }
+
+.field-textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+.field-textarea:focus { border-color: var(--blue); }
+.field-textarea::placeholder { color: var(--text-muted); }
+
+/* Language tabs in editor */
+.lang-tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.lang-editor-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border-dim);
+  background: none;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  transition: all 0.15s;
+}
+.lang-editor-tab.active {
+  background: rgba(88,166,255,0.08);
+  border-color: rgba(88,166,255,0.3);
+  color: var(--blue);
+}
+.lang-editor-tab:not(.active):hover { border-color: var(--border); color: var(--text-dim); }
+.lang-status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-filled { background: var(--green); }
+.dot-empty { background: var(--text-muted); }
+
+/* Lang availability in table */
+.lang-flags {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.lang-flag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+.flag-vi-yes { background: rgba(63,185,80,0.1); color: var(--green); border: 1px solid rgba(63,185,80,0.2); }
+.flag-en-yes { background: rgba(88,166,255,0.1); color: var(--blue); border: 1px solid rgba(88,166,255,0.2); }
+.flag-no { background: rgba(72,79,88,0.1); color: var(--text-muted); border: 1px solid rgba(72,79,88,0.15); text-decoration: line-through; }
+
+/* Markdown editor */
+.md-editor-wrap {
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg);
+  transition: border-color 0.2s;
+}
+.md-editor-wrap:focus-within { border-color: var(--blue); }
+
+.md-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  flex-wrap: wrap;
+}
+
+.md-tool {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-dim);
+  border: none;
+  background: none;
+  transition: all 0.15s;
+}
+.md-tool:hover { background: var(--surface); color: var(--text); }
+.md-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
+
+.md-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.md-tab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--text-muted);
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+.md-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+.md-textarea {
+  width: 100%;
+  min-height: 400px;
+  background: var(--bg);
+  border: none;
+  padding: 16px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  outline: none;
+  resize: vertical;
+  display: block;
+}
+
+.md-preview {
+  min-height: 400px;
+  padding: 20px;
+  display: none;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-dim);
+}
+.md-preview.visible { display: block; }
+.md-preview h1, .md-preview h2 { color: var(--text); font-family: 'Syne', sans-serif; margin: 24px 0 12px; }
+.md-preview h3 { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin: 20px 0 8px; }
+.md-preview p { margin-bottom: 16px; }
+.md-preview blockquote { border-left: 2px solid var(--green); padding: 4px 0 4px 16px; margin: 16px 0; color: rgba(0,255,136,0.6); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.md-preview code { background: var(--surface); border: 1px solid var(--border); padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--blue); }
+.md-preview pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 16px 0; overflow-x: auto; }
+.md-preview pre code { background: none; border: none; padding: 0; color: var(--text); }
+.md-preview strong { color: var(--text); }
+
+/* Toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.toggle-info {}
+.toggle-name { font-size: 13px; color: var(--text); font-weight: 500; }
+.toggle-desc { font-size: 12px; color: var(--text-muted); }
+
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border-dim);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--green); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(18px); background: #0d1117; }
+
+/* Tag chips */
+.tags-input-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  min-height: 42px;
+  align-items: center;
+  cursor: text;
+  transition: border-color 0.2s;
+}
+.tags-input-wrap:focus-within { border-color: var(--blue); }
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(88,166,255,0.1);
+  border: 1px solid rgba(88,166,255,0.25);
+  color: var(--blue);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.tag-chip-remove { cursor: pointer; opacity: 0.6; background: none; border: none; color: inherit; padding: 0; line-height: 1; }
+.tag-chip-remove:hover { opacity: 1; }
+
+.tags-bare-input {
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  min-width: 80px;
+  flex: 1;
+}
+.tags-bare-input::placeholder { color: var(--text-muted); }
+
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.tag-sug {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--border-dim);
+  border-radius: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  background: none;
+}
+.tag-sug:hover { border-color: var(--blue); color: var(--blue); background: rgba(88,166,255,0.08); }
+
+/* Confirm dialog */
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(1,4,9,0.8);
+  z-index: 8000;
+  align-items: center;
+  justify-content: center;
+}
+.confirm-overlay.visible { display: flex; }
+
+.confirm-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 32px;
+  width: 360px;
+  max-width: 90vw;
+}
+.confirm-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.confirm-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; line-height: 1.6; }
+.confirm-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--text);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.2s ease;
+  pointer-events: none;
+  min-width: 240px;
+}
+.toast-success { border-color: rgba(63,185,80,0.3); }
+.toast-success .toast-icon { color: var(--green); }
+.toast-error { border-color: rgba(248,81,73,0.3); }
+.toast-error .toast-icon { color: var(--red); }
+.toast-icon { font-size: 16px; flex-shrink: 0; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.readtime-auto-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  background: rgba(63,185,80,0.1);
+  border: 1px solid rgba(63,185,80,0.25);
+  border-radius: 4px;
+  padding: 1px 6px;
+  display: none;
+}
+
+.md-tool-upload {
+  margin-left: auto;
+  color: var(--blue) !important;
+  border-color: rgba(88,166,255,0.25) !important;
+  background: rgba(88,166,255,0.06) !important;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.md-tool-upload:hover {
+  background: rgba(88,166,255,0.14) !important;
+  border-color: rgba(88,166,255,0.5) !important;
+  color: #79b8ff !important;
+}
+
+.file-import-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--border);
+  display: none;
+}
+.file-import-hint.visible { display: block; }
+
+.html-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--orange);
+  background: rgba(219,109,40,0.1);
+  border: 1px solid rgba(219,109,40,0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  align-self: center;
+}
+.html-mode-badge button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+}
+.html-mode-badge button:hover { color: var(--red); }
+
+.md-toolbar.html-mode {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.md-preview iframe {
+  width: 100%;
+  height: 600px;
+  min-height: 600px;
+  border: none;
+  display: block;
+  border-radius: 0 0 6px 6px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { width: 180px; }
+  .editor-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .sidebar { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN OVERLAY ── -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo"><span>❯</span> long.blog / admin</div>
+    <div class="login-title">Đăng nhập</div>
+    <div class="login-sub">Quản trị blog của bạn</div>
+    <div class="login-error" id="login-error"></div>
+    <form onsubmit="doLogin(event)">
+      <div class="form-group">
+        <label class="form-label">Mật khẩu</label>
+        <input type="password" class="form-input" id="login-pw" placeholder="••••••••" autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Đăng nhập →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+  <div class="app-header">
+    <div class="header-brand">
+      <span class="prompt">❯</span>
+      <span class="name">long.blog</span>
+      <span class="sep">/</span>
+      <span class="page">admin</span>
+    </div>
+    <div class="header-actions">
+      <a href="/" class="header-site-link" target="_blank">← xem blog</a>
+      <button class="btn btn-ghost" onclick="doLogout()" style="font-size:12px;padding:6px 14px">Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Bài viết</div>
+        <button class="nav-item active" onclick="showPanel('dashboard')" id="nav-dashboard">
+          <span class="icon">📊</span> Tổng quan
+        </button>
+        <button class="nav-item" onclick="showPanel('posts')" id="nav-posts">
+          <span class="icon">📋</span> Tất cả bài
+          <span class="sidebar-badge" id="total-badge">0</span>
+        </button>
+        <button class="nav-item" onclick="showPanel('life-posts')" id="nav-life-posts">
+          <span class="icon">🌿</span> Life
+          <span class="sidebar-badge" id="life-badge">0</span>
+        </button>
+        <button class="nav-item" onclick="showPanel('work-posts')" id="nav-work-posts">
+          <span class="icon">💻</span> Work
+          <span class="sidebar-badge" id="work-badge">0</span>
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Tác vụ</div>
+        <button class="nav-item" onclick="openEditor(null, 'life')" id="nav-new-life">
+          <span class="icon">✍️</span> Bài life mới
+        </button>
+        <button class="nav-item" onclick="openEditor(null, 'work')" id="nav-new-work">
+          <span class="icon">⚡</span> Bài work mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+
+      <!-- Dashboard Panel -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="panel-header">
+          <div class="panel-title">
+            Tổng quan
+            <span class="panel-title-sub">// dashboard</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-secondary" onclick="openEditor(null, 'life')">+ Life</button>
+            <button class="btn btn-primary" onclick="openEditor(null, 'work')">+ Work</button>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-total">—</div>
+            <div class="stat-label">Tổng bài viết</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-published">—</div>
+            <div class="stat-label">Đã xuất bản</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-life">—</div>
+            <div class="stat-label">Life workspace</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-work">—</div>
+            <div class="stat-label">Work workspace</div>
+          </div>
+        </div>
+
+        <div class="posts-table-wrap">
+          <div class="posts-table-header">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim)">// recent posts</div>
+          </div>
+          <div id="dashboard-table">
+            <div class="empty-table">loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Posts Panel -->
+      <div class="panel" id="panel-posts">
+        <div class="panel-header">
+          <div class="panel-title">Tất cả bài viết</div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-secondary" onclick="openEditor(null,'life')">+ Life</button>
+            <button class="btn btn-primary" onclick="openEditor(null,'work')">+ Work</button>
+          </div>
+        </div>
+        <div class="posts-table-wrap">
+          <div class="posts-table-header">
+            <input type="search" class="table-search" placeholder="// tìm bài viết..." oninput="filterTable('all', this.value)">
+          </div>
+          <div id="all-posts-table">
+            <div class="empty-table">loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Life Posts Panel -->
+      <div class="panel" id="panel-life-posts">
+        <div class="panel-header">
+          <div class="panel-title" style="color:#d4a017">
+            🌿 Life
+            <span class="panel-title-sub">// workspace</span>
+          </div>
+          <button class="btn btn-primary" onclick="openEditor(null,'life')">+ Bài mới</button>
+        </div>
+        <div class="posts-table-wrap">
+          <div class="posts-table-header">
+            <input type="search" class="table-search" placeholder="// tìm bài life..." oninput="filterTable('life', this.value)">
+          </div>
+          <div id="life-posts-table">
+            <div class="empty-table">loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Work Posts Panel -->
+      <div class="panel" id="panel-work-posts">
+        <div class="panel-header">
+          <div class="panel-title" style="color:var(--green)">
+            💻 Work
+            <span class="panel-title-sub">// workspace</span>
+          </div>
+          <button class="btn btn-primary" onclick="openEditor(null,'work')">+ Bài mới</button>
+        </div>
+        <div class="posts-table-wrap">
+          <div class="posts-table-header">
+            <input type="search" class="table-search" placeholder="// tìm bài work..." oninput="filterTable('work', this.value)">
+          </div>
+          <div id="work-posts-table">
+            <div class="empty-table">loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor Panel -->
+      <div class="panel" id="panel-editor">
+        <div class="panel-header">
+          <div class="panel-title" id="editor-panel-title">Bài viết mới</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span id="editor-save-status" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)"></span>
+            <button class="btn btn-secondary" onclick="cancelEditor()">Hủy</button>
+            <button class="btn btn-primary" onclick="savePost()">Lưu bài →</button>
+          </div>
+        </div>
+
+        <div class="editor-grid">
+          <!-- Main editor -->
+          <div class="editor-main">
+            <!-- Language tabs -->
+            <div class="lang-tab-bar">
+              <button class="lang-editor-tab active" id="lang-tab-vi" onclick="switchLangTab('vi', this)">
+                <span class="lang-status-dot dot-empty" id="dot-vi"></span>
+                🇻🇳 Tiếng Việt
+              </button>
+              <button class="lang-editor-tab" id="lang-tab-en" onclick="switchLangTab('en', this)">
+                <span class="lang-status-dot dot-empty" id="dot-en"></span>
+                🇺🇸 English
+              </button>
+              <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);align-self:center">
+                cần ít nhất 1 ngôn ngữ có tiêu đề
+              </span>
+            </div>
+
+            <div class="editor-card">
+              <div class="editor-card-header" id="ed-title-label">Tiêu đề — Tiếng Việt</div>
+              <div class="editor-card-body">
+                <input type="text" class="field-input" id="ed-title"
+                  placeholder="Tiêu đề bài viết..."
+                  style="font-size:18px;font-weight:500"
+                  oninput="onEditorInput()">
+              </div>
+            </div>
+
+            <div class="editor-card">
+              <div class="editor-card-header" id="ed-excerpt-label">Tóm tắt — Tiếng Việt</div>
+              <div class="editor-card-body">
+                <textarea class="field-textarea" id="ed-excerpt" rows="3"
+                  placeholder="Mô tả ngắn hiển thị trong danh sách bài..."
+                  oninput="onEditorInput()"></textarea>
+              </div>
+            </div>
+
+            <div class="editor-card">
+              <div class="editor-card-header">
+                <span id="ed-content-label">Nội dung — Tiếng Việt</span>
+                <span style="color:var(--text-muted);font-weight:normal">Markdown</span>
+              </div>
+              <div class="editor-card-body" style="padding:0">
+                <div class="md-editor-wrap" style="border:none;border-radius:0">
+                  <div class="md-toolbar">
+                    <button class="md-tool" onclick="mdInsert('**', '**')"><b>B</b></button>
+                    <button class="md-tool" onclick="mdInsert('*', '*')"><i>I</i></button>
+                    <div class="md-sep"></div>
+                    <button class="md-tool" onclick="mdInsert('## ', '')">H2</button>
+                    <button class="md-tool" onclick="mdInsert('### ', '')">H3</button>
+                    <div class="md-sep"></div>
+                    <button class="md-tool" onclick="mdInsert('> ', '')">❝</button>
+                    <button class="md-tool" onclick="mdInsert('\n```\n', '\n```')">{ }</button>
+                    <div class="md-sep"></div>
+                    <button class="md-tool" onclick="mdInsert('- ', '')">List</button>
+                    <button class="md-tool" onclick="mdInsert('---\n', '')">HR</button>
+                    <div class="md-sep"></div>
+                    <button class="md-tool md-tool-upload" onclick="triggerFileUpload()" title="Import từ file .md, .html, .docx">↑ Import file</button>
+                  </div>
+                  <div class="file-import-hint" id="file-import-hint">// .md · .html · .docx được hỗ trợ — nội dung sẽ điền vào tab ngôn ngữ đang chọn</div>
+                  <div class="md-tabs">
+                    <button class="md-tab active" onclick="switchMdTab('write', this)">Write</button>
+                    <button class="md-tab" onclick="switchMdTab('preview', this)">Preview</button>
+                  </div>
+                  <textarea class="md-textarea" id="ed-content"
+                    placeholder="Viết nội dung bằng Markdown...&#10;&#10;## Tiêu đề phụ&#10;**đậm**, *nghiêng*&#10;> Trích dẫn&#10;&#10;```&#10;code block&#10;```"
+                    oninput="onEditorInput()"></textarea>
+                  <div class="md-preview" id="md-preview"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar settings -->
+          <div class="editor-sidebar">
+            <div class="editor-card">
+              <div class="editor-card-header">Workspace</div>
+              <div class="editor-card-body">
+                <select class="field-select" id="ed-workspace" onchange="onWorkspaceChange()">
+                  <option value="life">🌿 Life</option>
+                  <option value="work">💻 Work</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="editor-card">
+              <div class="editor-card-header">Trạng thái</div>
+              <div class="editor-card-body">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Xuất bản</div>
+                    <div class="toggle-desc">Hiển thị trên blog</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="ed-published" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-row" id="featured-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Nổi bật</div>
+                    <div class="toggle-desc">Hiển thị featured (Life)</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="ed-featured">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-name">Riêng tư 🔒</div>
+                    <div class="toggle-desc">Yêu cầu mật khẩu để đọc</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="ed-private">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-card">
+              <div class="editor-card-header">Thông tin</div>
+              <div class="editor-card-body">
+                <div class="field-group">
+                  <label class="field-label">Ngày đăng</label>
+                  <input type="date" class="field-input" id="ed-date">
+                </div>
+                <div class="field-group">
+                  <label class="field-label" style="display:flex;align-items:center;justify-content:space-between">
+                    Thời gian đọc (phút)
+                    <span class="readtime-auto-badge" id="readtime-auto-badge">● auto</span>
+                  </label>
+                  <input type="number" class="field-input" id="ed-readtime" min="1" max="60" value="5" oninput="onReadTimeManualInput()">
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-card">
+              <div class="editor-card-header">Tags</div>
+              <div class="editor-card-body">
+                <div class="tags-input-wrap" id="tags-wrap" onclick="document.getElementById('tags-input').focus()">
+                  <input class="tags-bare-input" id="tags-input" placeholder="Thêm tag, Enter để xác nhận..." onkeydown="handleTagKey(event)">
+                </div>
+                <div class="tag-suggestions" id="tag-suggestions">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted)">gợi ý:</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end main-content -->
+  </div><!-- end app-body -->
+</div><!-- end app -->
+
+<!-- Confirm Dialog -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Xác nhận</div>
+    <div class="confirm-desc" id="confirm-desc">Bạn có chắc không?</div>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Hủy</button>
+      <button class="btn btn-danger" id="confirm-ok">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- File upload input (hidden) -->
+<input type="file" id="file-upload-input" accept=".md,.html,.htm,.docx" style="display:none" onchange="handleFileUpload(event)">
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+marked.setOptions({ breaks: true });
+
+// ── State ──
+let allPosts = [];
+let editingPost = null;
+let editingWorkspace = null;
+let currentTags = [];
+let confirmCallback = null;
+
+// Bilingual editor state
+let activeLangTab = 'vi';
+let editorData = {
+  vi: { title: '', excerpt: '', content: '' },
+  en: { title: '', excerpt: '', content: '' }
+};
+
+const LIFE_TAGS = ['Du lịch & Nơi chốn', 'Suy nghĩ nhỏ', 'Khám phá', 'Đọc & Suy', 'Cuộc sống', 'Triết vặt'];
+const WORK_TAGS = ['ai', 'deep-dive', 'management', 'career', 'engineering', 'product'];
+
+// ── Auth ──
+async function checkAuth() {
+  const res = await fetch('/api/admin/check');
+  const data = await res.json();
+  if (data.authenticated) {
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    loadAllData();
+  }
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  const pw = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (res.ok) {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+      loadAllData();
+    } else {
+      const data = await res.json();
+      err.textContent = data.error || 'Đăng nhập thất bại';
+      err.style.display = 'block';
+    }
+  } catch {
+    err.textContent = 'Lỗi kết nối đến server';
+    err.style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  await fetch('/api/admin/logout', { method: 'POST' });
+  location.reload();
+}
+
+// ── Data ──
+async function loadAllData() {
+  try {
+    const res = await fetch('/api/admin/posts');
+    if (!res.ok) throw new Error();
+    allPosts = await res.json();
+    updateBadges();
+    updateStats();
+    renderTable('dashboard', allPosts.slice(0, 10));
+    renderTable('all', allPosts);
+    renderTable('life', allPosts.filter(p => p.workspace === 'life'));
+    renderTable('work', allPosts.filter(p => p.workspace === 'work'));
+  } catch {
+    toast('error', 'Không thể tải dữ liệu');
+  }
+}
+
+function updateBadges() {
+  document.getElementById('total-badge').textContent = allPosts.length;
+  document.getElementById('life-badge').textContent = allPosts.filter(p => p.workspace === 'life').length;
+  document.getElementById('work-badge').textContent = allPosts.filter(p => p.workspace === 'work').length;
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = allPosts.length;
+  document.getElementById('stat-published').textContent = allPosts.filter(p => p.published).length;
+  document.getElementById('stat-life').textContent = allPosts.filter(p => p.workspace === 'life').length;
+  document.getElementById('stat-work').textContent = allPosts.filter(p => p.workspace === 'work').length;
+}
+
+// ── Panels ──
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  const navEl = document.getElementById(`nav-${name}`);
+  if (navEl) navEl.classList.add('active');
+}
+
+// ── Table Rendering ──
+function formatDate(str) {
+  if (!str) return '—';
+  const [y, m] = str.split('-');
+  const mo = { '01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun',
+                '07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec' };
+  return `${mo[m] || m} ${y}`;
+}
+
+function getLangFlags(p) {
+  const hasVi = !!(p.vi && p.vi.title);
+  const hasEn = !!(p.en && p.en.title);
+  const vi = hasVi
+    ? '<span class="lang-flag flag-vi-yes">VI</span>'
+    : '<span class="lang-flag flag-no">VI</span>';
+  const en = hasEn
+    ? '<span class="lang-flag flag-en-yes">EN</span>'
+    : '<span class="lang-flag flag-no">EN</span>';
+  return `<div class="lang-flags">${vi}${en}</div>`;
+}
+
+function getPostDisplayTitle(p) {
+  return (p.vi && p.vi.title) || (p.en && p.en.title) || p.title || '(no title)';
+}
+
+function renderTable(scope, posts) {
+  const targets = {
+    dashboard: 'dashboard-table',
+    all: 'all-posts-table',
+    life: 'life-posts-table',
+    work: 'work-posts-table'
+  };
+  const el = document.getElementById(targets[scope]);
+  if (!el) return;
+
+  if (posts.length === 0) {
+    el.innerHTML = '<div class="empty-table">// không có bài viết nào</div>';
+    return;
+  }
+
+  const rows = posts.map(p => {
+    const ws = p.workspace || 'life';
+    const displayTitle = getPostDisplayTitle(p);
+    const privateBadge = p.private ? ' <span class="status-badge" style="background:rgba(188,140,255,0.1);color:#bc8cff;border-color:rgba(188,140,255,0.3)">🔒 private</span>' : '';
+    const statusBadge = (p.featured
+      ? '<span class="status-badge status-featured">✦ featured</span>'
+      : p.published
+        ? '<span class="status-badge status-published">● published</span>'
+        : '<span class="status-badge status-draft">○ draft</span>') + privateBadge;
+
+    return `<tr>
+      <td><div class="td-title" title="${escHtml(displayTitle)}">${escHtml(displayTitle)}</div></td>
+      <td><span class="td-workspace ws-${ws}">${ws}</span></td>
+      <td>${getLangFlags(p)}</td>
+      <td><div class="td-date">${formatDate(p.date)}</div></td>
+      <td>${statusBadge}</td>
+      <td>
+        <div class="td-actions">
+          <button class="action-btn action-edit" onclick="openEditor('${p.id}', '${ws}')">edit</button>
+          <button class="action-btn action-delete" onclick="confirmDelete('${p.id}', '${ws}', '${escHtml(displayTitle)}')">del</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>Tiêu đề</th>
+      <th>Workspace</th>
+      <th>Ngôn ngữ</th>
+      <th>Ngày</th>
+      <th>Trạng thái</th>
+      <th>Thao tác</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function filterTable(scope, query) {
+  const q = query.toLowerCase();
+  const filtered = allPosts.filter(p => {
+    const matchScope = scope === 'all' ? true : p.workspace === scope;
+    const viTitle = p.vi?.title || '';
+    const enTitle = p.en?.title || '';
+    const matchQuery = !q
+      || viTitle.toLowerCase().includes(q)
+      || enTitle.toLowerCase().includes(q)
+      || (p.vi?.excerpt || '').toLowerCase().includes(q);
+    return matchScope && matchQuery;
+  });
+  renderTable(scope, filtered);
+}
+
+// ── Bilingual Editor ──
+function syncFromEditor() {
+  editorData[activeLangTab] = {
+    title: document.getElementById('ed-title').value,
+    excerpt: document.getElementById('ed-excerpt').value,
+    content: document.getElementById('ed-content').value
+  };
+}
+
+function syncToEditor(lang) {
+  const d = editorData[lang];
+  document.getElementById('ed-title').value = d.title;
+  document.getElementById('ed-excerpt').value = d.excerpt;
+  document.getElementById('ed-content').value = d.content;
+  // Sync HTML mode UI for this language
+  updateHtmlModeUI(htmlImportMode[lang]);
+  // Reset to write tab
+  switchMdTab('write', document.querySelector('.md-tab.active') || document.querySelector('.md-tab'));
+}
+
+function switchLangTab(lang, btn) {
+  syncFromEditor();
+  activeLangTab = lang;
+  syncToEditor(lang);
+  document.querySelectorAll('.lang-editor-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  updateLangTabStatus();
+  updateEditorLabels(lang);
+}
+
+function updateEditorLabels(lang) {
+  const label = lang === 'vi' ? 'Tiếng Việt' : 'English';
+  document.getElementById('ed-title-label').textContent = `Tiêu đề — ${label}`;
+  document.getElementById('ed-excerpt-label').textContent = `Tóm tắt — ${label}`;
+  document.getElementById('ed-content-label').textContent = `Nội dung — ${label}`;
+  document.getElementById('ed-title').placeholder =
+    lang === 'vi' ? 'Tiêu đề bài viết...' : 'Post title...';
+  document.getElementById('ed-excerpt').placeholder =
+    lang === 'vi' ? 'Mô tả ngắn hiển thị trong danh sách bài...' : 'Short description shown in post list...';
+}
+
+function updateLangTabStatus() {
+  ['vi', 'en'].forEach(lang => {
+    const dot = document.getElementById(`dot-${lang}`);
+    const hasTitle = !!editorData[lang].title.trim();
+    dot.className = `lang-status-dot ${hasTitle ? 'dot-filled' : 'dot-empty'}`;
+  });
+}
+
+function onEditorInput() {
+  // Live-sync current tab to editorData for status dots
+  editorData[activeLangTab] = {
+    title: document.getElementById('ed-title').value,
+    excerpt: document.getElementById('ed-excerpt').value,
+    content: document.getElementById('ed-content').value
+  };
+  updateLangTabStatus();
+  estimateReadTime();
+}
+
+// ── Read Time Auto-Estimation ──
+let readtimeAutoMode = true;
+
+function estimateReadTime() {
+  if (!readtimeAutoMode) return;
+
+  const currentContent = document.getElementById('ed-content').value;
+  const viContent = activeLangTab === 'vi' ? currentContent : (editorData.vi.content || '');
+  const enContent = activeLangTab === 'en' ? currentContent : (editorData.en.content || '');
+
+  const countWords = text => {
+    const clean = text
+      .replace(/```[\s\S]*?```/g, '')   // fenced code blocks
+      .replace(/`[^`]+`/g, '')           // inline code
+      .replace(/!\[.*?\]\(.*?\)/g, '')   // images
+      .replace(/<[^>]+>/g, ' ')          // HTML tags
+      .replace(/[*_~`#>|]/g, ' ')        // markdown syntax chars
+      .trim();
+    return clean.split(/\s+/).filter(w => w.length > 0).length;
+  };
+
+  const viWords = countWords(viContent);
+  const enWords = countWords(enContent);
+  const maxWords = Math.max(viWords, enWords);
+  if (maxWords === 0) return;
+
+  // ~200 wpm for Vietnamese/mixed content
+  const minutes = Math.max(1, Math.ceil(maxWords / 200));
+  document.getElementById('ed-readtime').value = minutes;
+  document.getElementById('readtime-auto-badge').style.display = 'inline';
+}
+
+function onReadTimeManualInput() {
+  readtimeAutoMode = false;
+  document.getElementById('readtime-auto-badge').style.display = 'none';
+}
+
+// ── File Import ──
+
+// Per-language HTML render mode: stores raw HTML when imported from .html/.docx
+let htmlImportMode = { vi: false, en: false };
+
+function triggerFileUpload() {
+  const hint = document.getElementById('file-import-hint');
+  hint.classList.add('visible');
+  document.getElementById('file-upload-input').click();
+}
+
+async function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  try {
+    if (ext === 'md') {
+      const text = await file.text();
+      importContentToEditor(text, file.name, 'markdown');
+    } else if (ext === 'html' || ext === 'htm') {
+      const text = await file.text();
+      importContentToEditor(text, file.name, 'html');
+    } else if (ext === 'docx') {
+      await processDocxFile(file);
+    } else {
+      toast('error', 'Định dạng không hỗ trợ — dùng .md, .html, hoặc .docx');
+    }
+  } catch (err) {
+    toast('error', 'Không thể đọc file: ' + (err.message || err));
+  }
+
+  document.getElementById('file-import-hint').classList.remove('visible');
+}
+
+function importContentToEditor(rawText, filename, type) {
+  let content = rawText;
+  let extractedTitle = '';
+
+  if (type === 'html') {
+    // Extract title
+    const titleMatch = rawText.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    if (titleMatch) extractedTitle = titleMatch[1].replace(/<[^>]+>/g, '').trim();
+    const h1Match = rawText.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    if (!extractedTitle && h1Match) extractedTitle = h1Match[1].replace(/<[^>]+>/g, '').trim();
+
+    // Keep raw HTML as-is — will render in iframe
+    content = rawText;
+    htmlImportMode[activeLangTab] = true;
+
+  } else if (type === 'markdown') {
+    htmlImportMode[activeLangTab] = false;
+    const h1Match = content.match(/^#\s+(.+)$/m);
+    if (h1Match) {
+      extractedTitle = h1Match[1].trim();
+      content = content.replace(/^#\s+.+\n?/, '').trim();
+    }
+  }
+
+  document.getElementById('ed-content').value = content;
+
+  if (extractedTitle && !document.getElementById('ed-title').value.trim()) {
+    document.getElementById('ed-title').value = extractedTitle;
+  }
+
+  readtimeAutoMode = true;
+  onEditorInput();
+
+  // If HTML mode: show rendered preview immediately + update UI
+  if (htmlImportMode[activeLangTab]) {
+    updateHtmlModeUI(true);
+    const previewTab = document.querySelectorAll('.md-tab')[1];
+    switchMdTab('preview', previewTab);
+    toast('success', `Đã import "${filename}" — đang render HTML`);
+  } else {
+    toast('success', `Đã import từ "${filename}"`);
+  }
+}
+
+async function processDocxFile(file) {
+  if (!window.mammoth) {
+    throw new Error('Thư viện mammoth.js chưa tải — hãy thử lại hoặc kiểm tra kết nối mạng');
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await mammoth.convertToHtml({ arrayBuffer });
+  if (result.messages && result.messages.length) {
+    console.warn('mammoth warnings:', result.messages);
+  }
+  // Wrap mammoth fragment in a full document for proper iframe rendering
+  const wrapped = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+         line-height: 1.75; padding: 32px 40px; max-width: 820px; margin: 0 auto; color: #1a1a1a; background: #ffffff; }
+  h1,h2,h3,h4 { font-weight: 600; margin: 1.4em 0 0.4em; line-height: 1.3; }
+  p { margin: 0 0 1em; }
+  img { max-width: 100%; height: auto; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  td, th { border: 1px solid #d0d7de; padding: 8px 12px; text-align: left; }
+  th { background: #f6f8fa; font-weight: 600; }
+  ul, ol { padding-left: 1.5em; margin: 0 0 1em; }
+  blockquote { margin: 0 0 1em; padding: 0 1em; border-left: 4px solid #d0d7de; color: #57606a; }
+  code { background: #f6f8fa; padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
+  pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+</style>
+</head><body>${result.value}</body></html>`;
+  importContentToEditor(wrapped, file.name, 'html');
+}
+
+function updateHtmlModeUI(isHtml) {
+  const toolbar = document.querySelector('.md-toolbar');
+  const tabs = document.querySelector('.md-tabs');
+
+  if (isHtml) {
+    toolbar.classList.add('html-mode');
+    if (!document.getElementById('html-mode-badge')) {
+      const badge = document.createElement('span');
+      badge.id = 'html-mode-badge';
+      badge.className = 'html-mode-badge';
+      badge.innerHTML = '⟨/⟩ HTML mode &nbsp;<button onclick="clearHtmlMode()" title="Bỏ HTML mode, chuyển về Markdown">✕</button>';
+      tabs.appendChild(badge);
+    }
+  } else {
+    toolbar.classList.remove('html-mode');
+    const badge = document.getElementById('html-mode-badge');
+    if (badge) badge.remove();
+  }
+}
+
+function clearHtmlMode() {
+  htmlImportMode[activeLangTab] = false;
+  updateHtmlModeUI(false);
+  const writeTab = document.querySelector('.md-tab');
+  switchMdTab('write', writeTab);
+}
+
+// ── Editor ──
+async function openEditor(postId, workspace) {
+  editingPost = null;
+  editingWorkspace = workspace || 'life';
+  currentTags = [];
+  activeLangTab = 'vi';
+  editorData = {
+    vi: { title: '', excerpt: '', content: '' },
+    en: { title: '', excerpt: '', content: '' }
+  };
+
+  // Reset common fields
+  readtimeAutoMode = true;
+  htmlImportMode = { vi: false, en: false };
+  document.getElementById('readtime-auto-badge').style.display = 'none';
+  updateHtmlModeUI(false);
+  document.getElementById('ed-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ed-readtime').value = '5';
+  document.getElementById('ed-published').checked = true;
+  document.getElementById('ed-featured').checked = false;
+  document.getElementById('ed-private').checked = false;
+  document.getElementById('ed-workspace').value = editingWorkspace;
+
+  if (postId) {
+    try {
+      const res = await fetch(`/api/admin/posts/${postId}?workspace=${workspace}`);
+      if (!res.ok) throw new Error();
+      const post = await res.json();
+      editingPost = post;
+      editingWorkspace = post.workspace || workspace;
+
+      editorData.vi = {
+        title: post.vi?.title || '',
+        excerpt: post.vi?.excerpt || '',
+        content: post.vi?.content || ''
+      };
+      editorData.en = {
+        title: post.en?.title || '',
+        excerpt: post.en?.excerpt || '',
+        content: post.en?.content || ''
+      };
+
+      document.getElementById('ed-date').value = post.date || '';
+      document.getElementById('ed-readtime').value = post.readTime || '5';
+      readtimeAutoMode = false; // existing post has manually-set or previously-saved readtime
+      document.getElementById('readtime-auto-badge').style.display = 'none';
+      document.getElementById('ed-published').checked = !!post.published;
+      document.getElementById('ed-featured').checked = !!post.featured;
+      document.getElementById('ed-private').checked = !!post.private;
+      document.getElementById('ed-workspace').value = editingWorkspace;
+      currentTags = [...(post.tags || [])];
+    } catch {
+      toast('error', 'Không thể tải bài viết');
+      return;
+    }
+    document.getElementById('editor-panel-title').textContent = 'Chỉnh sửa bài viết';
+  } else {
+    document.getElementById('editor-panel-title').textContent = 'Bài viết mới';
+  }
+
+  // Load VI tab by default
+  syncToEditor('vi');
+  updateEditorLabels('vi');
+  updateLangTabStatus();
+  document.getElementById('lang-tab-vi').classList.add('active');
+  document.getElementById('lang-tab-en').classList.remove('active');
+
+  renderTagChips();
+  onWorkspaceChange();
+  showPanel('editor');
+}
+
+function onWorkspaceChange() {
+  const ws = document.getElementById('ed-workspace').value;
+  editingWorkspace = ws;
+  const featRow = document.getElementById('featured-row');
+  featRow.style.display = ws === 'life' ? 'flex' : 'none';
+  updateTagSuggestions();
+}
+
+function cancelEditor() {
+  showPanel('dashboard');
+}
+
+async function savePost() {
+  // Capture current tab before saving
+  syncFromEditor();
+
+  const hasVi = !!editorData.vi.title.trim();
+  const hasEn = !!editorData.en.title.trim();
+  if (!hasVi && !hasEn) {
+    toast('error', 'Cần ít nhất một ngôn ngữ có tiêu đề');
+    return;
+  }
+
+  const ws = document.getElementById('ed-workspace').value;
+  const payload = {
+    workspace: ws,
+    vi: editorData.vi,
+    en: editorData.en,
+    tags: currentTags,
+    date: document.getElementById('ed-date').value,
+    readTime: document.getElementById('ed-readtime').value,
+    featured: document.getElementById('ed-featured').checked,
+    published: document.getElementById('ed-published').checked,
+    private: document.getElementById('ed-private').checked
+  };
+
+  document.getElementById('editor-save-status').textContent = 'đang lưu...';
+
+  try {
+    let res;
+    if (editingPost) {
+      res = await fetch(`/api/admin/posts/${editingPost.id}?workspace=${editingPost.workspace}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch('/api/admin/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Lỗi lưu bài');
+    }
+
+    document.getElementById('editor-save-status').textContent = '';
+    toast('success', editingPost ? 'Đã cập nhật bài viết' : 'Đã tạo bài viết mới');
+    await loadAllData();
+    showPanel(ws === 'life' ? 'life-posts' : 'work-posts');
+  } catch (err) {
+    document.getElementById('editor-save-status').textContent = '';
+    toast('error', err.message || 'Lỗi lưu bài viết');
+  }
+}
+
+// ── Delete ──
+function confirmDelete(id, workspace, title) {
+  document.getElementById('confirm-title').textContent = 'Xóa bài viết';
+  document.getElementById('confirm-desc').textContent = `Bạn có chắc muốn xóa "${title}"? Hành động này không thể hoàn tác.`;
+  document.getElementById('confirm-overlay').classList.add('visible');
+  document.getElementById('confirm-ok').onclick = () => doDelete(id, workspace);
+}
+
+async function doDelete(id, workspace) {
+  closeConfirm();
+  try {
+    const res = await fetch(`/api/admin/posts/${id}?workspace=${workspace}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error();
+    toast('success', 'Đã xóa bài viết');
+    await loadAllData();
+  } catch {
+    toast('error', 'Không thể xóa bài viết');
+  }
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('visible');
+}
+
+// ── Markdown Editor ──
+function isFullHtmlDoc(content) {
+  const t = (content || '').trimStart().toLowerCase();
+  return t.startsWith('<!doctype') || t.startsWith('<html');
+}
+
+function switchMdTab(tab, btn) {
+  document.querySelectorAll('.md-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const textarea = document.getElementById('ed-content');
+  const preview = document.getElementById('md-preview');
+
+  if (tab === 'preview') {
+    textarea.style.display = 'none';
+    preview.classList.add('visible');
+
+    const content = textarea.value || '';
+    if (isFullHtmlDoc(content)) {
+      // Render raw HTML in isolated iframe
+      preview.innerHTML = '';
+      preview.style.padding = '0';
+      const iframe = document.createElement('iframe');
+      iframe.sandbox = 'allow-scripts allow-same-origin allow-popups';
+      iframe.srcdoc = content;
+      iframe.onload = () => {
+        try {
+          const h = iframe.contentDocument.documentElement.scrollHeight;
+          if (h > 100) iframe.style.height = (h + 32) + 'px';
+        } catch(e) {}
+      };
+      preview.appendChild(iframe);
+    } else {
+      preview.style.padding = '';
+      preview.innerHTML = marked.parse(content || '*nội dung trống*');
+    }
+  } else {
+    textarea.style.display = 'block';
+    preview.classList.remove('visible');
+    textarea.focus();
+  }
+}
+
+function mdInsert(before, after) {
+  const ta = document.getElementById('ed-content');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end);
+  const newText = before + sel + after;
+  ta.value = ta.value.substring(0, start) + newText + ta.value.substring(end);
+  ta.focus();
+  ta.selectionStart = start + before.length;
+  ta.selectionEnd = start + before.length + sel.length;
+}
+
+// ── Tags ──
+function updateTagSuggestions() {
+  const ws = document.getElementById('ed-workspace').value;
+  const sug = document.getElementById('tag-suggestions');
+  const tags = ws === 'work' ? WORK_TAGS : LIFE_TAGS;
+  sug.innerHTML = '<span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--text-muted)">gợi ý:</span>';
+  tags.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-sug';
+    btn.textContent = t;
+    btn.onclick = () => addTag(t);
+    sug.appendChild(btn);
+  });
+}
+
+function handleTagKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/, '');
+    if (val) addTag(val);
+    e.target.value = '';
+  } else if (e.key === 'Backspace' && !e.target.value && currentTags.length) {
+    currentTags.pop();
+    renderTagChips();
+  }
+}
+
+function addTag(tag) {
+  tag = tag.trim();
+  if (!tag || currentTags.includes(tag)) return;
+  currentTags.push(tag);
+  renderTagChips();
+  document.getElementById('tags-input').value = '';
+}
+
+function removeTag(tag) {
+  currentTags = currentTags.filter(t => t !== tag);
+  renderTagChips();
+}
+
+function renderTagChips() {
+  const wrap = document.getElementById('tags-wrap');
+  const input = document.getElementById('tags-input');
+  wrap.innerHTML = '';
+  currentTags.forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${escHtml(tag)} <button class="tag-chip-remove" onclick="removeTag('${escHtml(tag)}')" title="Xóa tag">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+
+// ── Helpers ──
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(type, msg) {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span class="toast-icon">${type === 'success' ? '✓' : '✗'}</span> ${escHtml(msg)}`;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── Init ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeConfirm();
+});
+
+// Close confirm on overlay click
+document.getElementById('confirm-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('confirm-overlay')) closeConfirm();
+});
+
+checkAuth();
+</script>
+</body>
+</html>

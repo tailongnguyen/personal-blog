@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đời Sống — Long</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+:root {
+  --paper: #f6f1e8;
+  --paper-warm: #ede6d6;
+  --ink: #1e160a;
+  --ink-light: #4a3820;
+  --ink-faint: #9a8060;
+  --ink-ghost: rgba(30,22,10,0.08);
+  --sepia: #7a5c3a;
+  --rust: #8b4a2a;
+  --sage: #5a6b50;
+  --rule: rgba(122,92,58,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'EB Garamond', serif;
+  font-size: 18px;
+  line-height: 1.7;
+  min-height: 100vh;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(100,70,30,0.08) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(246,241,232,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+  padding: 0 48px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-home {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-faint);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.3s;
+}
+.nav-home:hover { color: var(--sepia); }
+
+.nav-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--ink);
+  letter-spacing: 2px;
+  text-align: center;
+}
+.nav-brand span { font-style: italic; color: var(--sepia); }
+
+.nav-switch {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.nav-switch:hover { color: var(--ink); }
+
+/* ── LANG SWITCHER ── */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+.lang-btn {
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--ink-faint);
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+.lang-btn.active {
+  border-color: var(--rule);
+  color: var(--sepia);
+  background: rgba(122,92,58,0.06);
+}
+.lang-btn:not(.active):hover { color: var(--ink); }
+.lang-sep { color: var(--rule); }
+
+/* ── LANG NOTICE ── */
+.lang-notice {
+  display: none;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 48px 8px;
+}
+.lang-notice-inner {
+  background: rgba(122,92,58,0.04);
+  border: 1px solid rgba(122,92,58,0.12);
+  border-left: 2px solid var(--sepia);
+  padding: 11px 20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-faint);
+}
+.lang-notice-inner span { color: var(--sepia); }
+
+/* Post view lang notice */
+.pv-lang-notice {
+  display: none;
+  background: rgba(122,92,58,0.04);
+  border: 1px solid rgba(122,92,58,0.12);
+  border-left: 2px solid var(--sepia);
+  padding: 11px 20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-faint);
+  margin-bottom: 32px;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 80px 48px 60px;
+  text-align: center;
+}
+
+.hero-ornament {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: appear 0.8s ease 0.2s forwards;
+}
+
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(56px, 8vw, 96px);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -2px;
+  color: var(--ink);
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: appear 0.8s ease 0.4s forwards;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--sepia);
+  display: block;
+  font-size: 0.75em;
+  letter-spacing: 0px;
+}
+
+.hero-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px;
+  font-style: italic;
+  color: var(--ink-faint);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto;
+  opacity: 0;
+  animation: appear 0.8s ease 0.6s forwards;
+}
+
+.hero-rule {
+  width: 60px;
+  height: 1px;
+  background: var(--rule);
+  margin: 40px auto;
+  opacity: 0;
+  animation: appear 0.8s ease 0.8s forwards;
+}
+
+@keyframes appear {
+  from { opacity:0; transform: translateY(12px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+/* ── FEATURED ── */
+.featured {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto 80px;
+  padding: 0 48px;
+  opacity: 0;
+  animation: appear 0.8s ease 1s forwards;
+}
+
+.featured-inner {
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  padding: 52px 60px;
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.4s ease;
+}
+
+.featured-inner:hover {
+  box-shadow: 6px 6px 0 var(--rule);
+}
+
+.featured-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sepia);
+  margin-bottom: 20px;
+}
+
+.featured-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+.featured-excerpt {
+  font-size: 17px;
+  color: var(--ink-light);
+  line-height: 1.75;
+  max-width: 600px;
+  font-style: italic;
+  margin-bottom: 28px;
+}
+
+.featured-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 1px;
+}
+
+.meta-dot { color: var(--rule); }
+
+/* ── POSTS ── */
+.posts-section {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto 100px;
+  padding: 0 48px;
+}
+
+.section-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.post-item {
+  padding: 36px 0;
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 32px;
+  align-items: start;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.post-item:first-child { border-top: 1px solid var(--rule); }
+.post-item:hover .post-title { color: var(--sepia); }
+.post-item:hover .post-date { color: var(--ink-light); }
+
+.post-date {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-style: italic;
+  padding-top: 4px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.post-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--sepia);
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
+
+.post-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 10px;
+  transition: color 0.3s;
+  letter-spacing: -0.3px;
+}
+
+.post-excerpt {
+  font-size: 15px;
+  color: var(--ink-faint);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ── LOADING & EMPTY ── */
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 60px 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--ink-faint);
+  font-size: 18px;
+}
+
+/* ── POST VIEW ── */
+.post-view {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--paper);
+  overflow-y: auto;
+}
+
+.post-view.open { display: block; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.post-view-nav {
+  position: sticky;
+  top: 0;
+  background: rgba(246,241,232,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+  padding: 0 48px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.post-view-progress {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: var(--sepia);
+  transition: width 0.1s linear;
+}
+
+.post-view-back {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: color 0.3s;
+  background: none;
+  border: none;
+}
+.post-view-back:hover { color: var(--sepia); }
+
+.post-view-content {
+  max-width: min(980px, 75vw);
+  margin: 0 auto;
+  padding: 60px 48px 100px;
+}
+
+.pv-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sepia);
+  margin-bottom: 20px;
+}
+
+.pv-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.pv-meta {
+  display: flex;
+  gap: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Post body rendered from markdown */
+.pv-body { font-size: 18px; line-height: 1.85; color: var(--ink-light); }
+.pv-body > p:first-child { font-size: 20px; font-style: italic; color: var(--ink); }
+.pv-body p { margin-bottom: 24px; }
+.pv-body blockquote {
+  border-left: 2px solid var(--sepia);
+  padding: 4px 0 4px 24px;
+  margin: 32px 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.pv-body h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 40px 0 16px;
+  letter-spacing: -0.3px;
+}
+.pv-body code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  background: var(--paper-warm);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--rule);
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+.private-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(246,241,232,0.92);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+}
+.private-overlay.open { display: flex; }
+.private-box {
+  width: 360px;
+  background: #fff;
+  border: 1px solid rgba(122,92,58,0.2);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+}
+.private-icon { font-size: 32px; margin-bottom: 16px; }
+.private-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  color: var(--sepia);
+  margin-bottom: 6px;
+}
+.private-sub {
+  font-size: 14px;
+  color: var(--ink-light);
+  margin-bottom: 24px;
+}
+.private-input {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid rgba(122,92,58,0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: var(--ink);
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+.private-input:focus { outline: none; border-color: var(--sepia); }
+.private-btn {
+  width: 100%;
+  background: var(--sepia);
+  color: var(--paper);
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+.private-btn:hover { opacity: 0.85; }
+.private-error {
+  font-size: 13px;
+  color: #c0392b;
+  min-height: 16px;
+  margin-bottom: 8px;
+  font-family: 'EB Garamond', serif;
+}
+.private-cancel {
+  background: none;
+  border: none;
+  color: var(--ink-light);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: 'EB Garamond', serif;
+}
+.private-cancel:hover { color: var(--sepia); }
+
+@media (max-width: 700px) {
+  nav, footer { padding: 0 24px; }
+  .hero, .featured, .posts-section { padding-left: 24px; padding-right: 24px; }
+  .featured-inner { padding: 32px 28px; }
+  .post-item { grid-template-columns: 1fr; gap: 8px; }
+  .post-date { text-align: left; }
+  .post-view-content { padding: 40px 24px 80px; }
+  .post-view-nav { padding: 0 24px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-home">← trang chủ</a>
+  <div class="nav-brand">L o n g <span>· sống</span></div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="lang-switcher">
+      <button class="lang-btn active" id="btn-vi" onclick="setLang('vi')">VI</button>
+      <span class="lang-sep">/</span>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+    <a href="/work" class="nav-switch">work →</a>
+  </div>
+</nav>
+
+<div class="lang-notice" id="lang-notice">
+  <div class="lang-notice-inner" id="lang-notice-text"></div>
+</div>
+
+<div class="hero">
+  <div class="hero-ornament">✦ &nbsp; đời sống &nbsp; ✦</div>
+  <h1>Ghi chép<br><em>của một kẻ hay để ý</em></h1>
+  <div class="hero-rule"></div>
+  <p class="hero-quote">"Không phải mọi thứ đáng nghĩ đều đáng viết — nhưng mọi thứ được viết đều từng đáng nghĩ."</p>
+</div>
+
+<!-- FEATURED -->
+<div class="featured" id="featured-section" style="display:none">
+  <div class="featured-inner" id="featured-inner">
+    <div class="featured-label">✦ Bài nổi bật</div>
+    <h2 class="featured-title" id="feat-title"></h2>
+    <p class="featured-excerpt" id="feat-excerpt"></p>
+    <div class="featured-meta">
+      <span id="feat-date"></span>
+      <span class="meta-dot">·</span>
+      <span id="feat-tag"></span>
+      <span class="meta-dot">·</span>
+      <span id="feat-read"></span>
+    </div>
+  </div>
+</div>
+
+<!-- POSTS -->
+<div class="posts-section">
+  <div class="section-heading">Tất cả bài viết</div>
+  <div class="posts-list" id="posts-list">
+    <div class="loading-state">đang tải bài viết...</div>
+  </div>
+</div>
+
+<footer>
+  <span>Long · 2025</span>
+  <span>Viết vì muốn viết</span>
+</footer>
+
+<!-- POST VIEW -->
+<div class="post-view" id="post-view">
+  <div class="post-view-nav">
+    <button class="post-view-back" onclick="closePost()">← quay lại</button>
+    <div class="post-view-progress" id="post-progress"></div>
+  </div>
+  <div class="post-view-content" id="post-view-content">
+    <div class="pv-label" id="pv-label"></div>
+    <h1 class="pv-title" id="pv-title"></h1>
+    <div class="pv-meta" id="pv-meta"></div>
+    <div class="pv-lang-notice" id="pv-lang-notice"></div>
+    <div class="pv-body" id="pv-body"></div>
+  </div>
+</div>
+
+<!-- Private Post Overlay -->
+<div class="private-overlay" id="private-overlay">
+  <div class="private-box">
+    <div class="private-icon">🔒</div>
+    <div class="private-title">Bài viết riêng tư</div>
+    <div class="private-sub">Bài viết này được bảo vệ bằng mật khẩu</div>
+    <form onsubmit="submitPrivatePw(event)">
+      <input type="password" class="private-input" id="private-pw" placeholder="Nhập mật khẩu..." autocomplete="current-password">
+      <button type="submit" class="private-btn">Mở khóa →</button>
+    </form>
+    <div class="private-error" id="private-error"></div>
+    <button class="private-cancel" onclick="closePrivateOverlay()">← Quay lại</button>
+  </div>
+</div>
+
+<script>
+marked.setOptions({ breaks: true });
+
+function renderContent(pvBody, content) {
+  const trimmed = (content || '').trimStart().toLowerCase();
+  const isFullHtml = trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');
+  if (isFullHtml) {
+    pvBody.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'width:100%;border:none;display:block;min-height:80vh;background:#fff;';
+    iframe.srcdoc = content;
+    iframe.onload = () => {
+      try {
+        const h = iframe.contentDocument.documentElement.scrollHeight;
+        if (h > 100) iframe.style.height = (h + 32) + 'px';
+      } catch(e) {}
+    };
+    pvBody.appendChild(iframe);
+  } else {
+    pvBody.innerHTML = marked.parse(content || '');
+  }
+}
+
+// ── Private Posts ──
+let pendingPrivatePostId = null;
+
+function closePrivateOverlay() {
+  document.getElementById('private-overlay').classList.remove('open');
+  document.getElementById('private-pw').value = '';
+  document.getElementById('private-error').textContent = '';
+  pendingPrivatePostId = null;
+}
+
+async function submitPrivatePw(e) {
+  e.preventDefault();
+  const pw = document.getElementById('private-pw').value;
+  const errEl = document.getElementById('private-error');
+  errEl.textContent = '';
+  if (!pw) return;
+
+  try {
+    const res = await fetch(`/api/posts/${pendingPrivatePostId}/unlock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workspace: 'life', lang: currentLang, password: pw })
+    });
+    if (res.ok) {
+      const post = await res.json();
+      closePrivateOverlay();
+      renderOpenPost(post);
+    } else {
+      errEl.textContent = 'Sai mật khẩu, vui lòng thử lại.';
+      document.getElementById('private-pw').value = '';
+    }
+  } catch {
+    errEl.textContent = 'Lỗi kết nối, vui lòng thử lại.';
+  }
+}
+
+let allPosts = [];
+let currentLang = localStorage.getItem('blog-lang') || 'vi';
+
+// ── UI Strings ──
+const UI = {
+  vi: {
+    navHome: '← trang chủ',
+    navBrandSub: '· sống',
+    navSwitch: 'work →',
+    heroOrnament: '✦ &nbsp; đời sống &nbsp; ✦',
+    heroTitle: 'Ghi chép',
+    heroTitleEm: 'của một kẻ hay để ý',
+    heroQuote: '"Không phải mọi thứ đáng nghĩ đều đáng viết — nhưng mọi thứ được viết đều từng đáng nghĩ."',
+    featuredLabel: '✦ Bài nổi bật',
+    sectionAll: 'Tất cả bài viết',
+    footerLeft: 'Long · 2025',
+    footerRight: 'Viết vì muốn viết',
+    pvBack: '← quay lại',
+    author: 'Long',
+    readTime: n => `${n} phút đọc`,
+    loading: 'đang tải bài viết...',
+    noPostsYet: 'Chưa có bài viết nào. <a href="/admin" style="color:var(--sepia)">Viết bài đầu tiên →</a>',
+    langNoticeList: 'Một số bài viết chưa có bản tiếng Anh — đang hiển thị tiếng Việt.',
+    langNoticePost: '✦ Bài viết này chưa có bản tiếng Anh. Đang hiển thị bản tiếng Việt.',
+  },
+  en: {
+    navHome: '← home',
+    navBrandSub: '· life',
+    navSwitch: 'work →',
+    heroOrnament: '✦ &nbsp; life notes &nbsp; ✦',
+    heroTitle: 'Notes',
+    heroTitleEm: 'from someone who notices things',
+    heroQuote: '"Not everything worth thinking is worth writing — but everything written was once worth thinking."',
+    featuredLabel: '✦ Featured',
+    sectionAll: 'All posts',
+    footerLeft: 'Long · 2025',
+    footerRight: 'Written because I wanted to',
+    pvBack: '← back',
+    author: 'Long',
+    readTime: n => `${n} min read`,
+    loading: 'loading posts...',
+    noPostsYet: 'No posts yet. <a href="/admin" style="color:var(--sepia)">Write the first one →</a>',
+    langNoticeList: 'Some posts are not available in English — showing Vietnamese instead.',
+    langNoticePost: "✦ This post hasn't been translated to English yet. Showing Vietnamese.",
+  }
+};
+
+function u() { return UI[currentLang] || UI.vi; }
+
+function applyUILang(lang) {
+  const s = UI[lang] || UI.vi;
+
+  const q = (sel) => document.querySelector(sel);
+
+  const navHome = q('.nav-home');
+  if (navHome) navHome.textContent = s.navHome;
+
+  const navBrand = q('.nav-brand');
+  if (navBrand) navBrand.innerHTML = `L o n g <span>${s.navBrandSub}</span>`;
+
+  const navSwitch = q('.nav-switch');
+  if (navSwitch) navSwitch.textContent = s.navSwitch;
+
+  const heroOrnament = q('.hero-ornament');
+  if (heroOrnament) heroOrnament.innerHTML = s.heroOrnament;
+
+  const heroH1 = q('.hero h1');
+  if (heroH1) heroH1.innerHTML = `${s.heroTitle}<br><em>${s.heroTitleEm}</em>`;
+
+  const heroQuote = q('.hero-quote');
+  if (heroQuote) heroQuote.textContent = s.heroQuote;
+
+  const featLabel = q('.featured-label');
+  if (featLabel) featLabel.textContent = s.featuredLabel;
+
+  const sectionHeading = q('.section-heading');
+  if (sectionHeading) sectionHeading.textContent = s.sectionAll;
+
+  const footerSpans = document.querySelectorAll('footer span');
+  if (footerSpans[0]) footerSpans[0].textContent = s.footerLeft;
+  if (footerSpans[1]) footerSpans[1].textContent = s.footerRight;
+
+  const pvBack = q('.post-view-back');
+  if (pvBack) pvBack.textContent = s.pvBack;
+
+  const loadingEl = q('.loading-state');
+  if (loadingEl) loadingEl.textContent = s.loading;
+}
+
+const MONTHS = {
+  vi: { '01':'Tháng 1','02':'Tháng 2','03':'Tháng 3','04':'Tháng 4',
+        '05':'Tháng 5','06':'Tháng 6','07':'Tháng 7','08':'Tháng 8',
+        '09':'Tháng 9','10':'Tháng 10','11':'Tháng 11','12':'Tháng 12' },
+  en: { '01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun',
+        '07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec' }
+};
+
+function formatDate(dateStr, lang) {
+  const [year, month] = dateStr.split('-');
+  const m = MONTHS[lang]?.[month] || MONTHS.en[month] || month;
+  return lang === 'vi' ? `${m}, ${year}` : `${m} ${year}`;
+}
+
+function formatDateShort(dateStr) {
+  const [year, month] = dateStr.split('-');
+  return { m: MONTHS.en[month] || month, y: year };
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('blog-lang', lang);
+  document.getElementById('btn-vi').classList.toggle('active', lang === 'vi');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  applyUILang(lang);
+  loadPosts();
+}
+
+function updateLangUI() {
+  document.getElementById('btn-vi').classList.toggle('active', currentLang === 'vi');
+  document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+}
+
+function showPageNotice(posts) {
+  const notice = document.getElementById('lang-notice');
+  const text = document.getElementById('lang-notice-text');
+  const hasFallbacks = posts.some(p => p.requestedLang !== p.lang);
+  if (hasFallbacks) {
+    text.innerHTML = u().langNoticeList;
+    notice.style.display = 'block';
+  } else {
+    notice.style.display = 'none';
+  }
+}
+
+async function loadPosts() {
+  try {
+    const res = await fetch(`/api/posts?workspace=life&lang=${currentLang}`);
+    if (!res.ok) throw new Error('Failed to load');
+    allPosts = await res.json();
+    updateLangUI();
+    showPageNotice(allPosts);
+    renderAll();
+  } catch {
+    document.getElementById('posts-list').innerHTML =
+      `<div class="empty-state">${currentLang === 'en' ? 'Failed to load posts. Please try again.' : 'Không thể tải bài viết. Vui lòng thử lại.'}</div>`;
+  }
+}
+
+function renderAll() {
+  const featured = allPosts.find(p => p.featured);
+  const rest = allPosts.filter(p => !p.featured);
+
+  const featSection = document.getElementById('featured-section');
+  if (featured) {
+    document.getElementById('feat-title').textContent = featured.title + (featured.private ? ' 🔒' : '');
+    document.getElementById('feat-excerpt').textContent = featured.excerpt;
+    document.getElementById('feat-date').textContent = formatDate(featured.date, featured.lang);
+    document.getElementById('feat-tag').textContent = featured.tags[0] || '';
+    document.getElementById('feat-read').textContent = u().readTime(featured.readTime);
+    document.getElementById('featured-inner').onclick = () => openPost(featured.id);
+    featSection.style.display = 'block';
+  } else {
+    featSection.style.display = 'none';
+  }
+
+  const list = document.getElementById('posts-list');
+  if (rest.length === 0 && !featured) {
+    list.innerHTML = `<div class="empty-state">${u().noPostsYet}</div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  rest.forEach((post, i) => {
+    const { m, y } = formatDateShort(post.date);
+    const item = document.createElement('div');
+    item.className = 'post-item';
+    item.style.cssText = `opacity:0;transform:translateY(16px);transition:opacity 0.5s ease ${i * 0.08}s,transform 0.5s ease ${i * 0.08}s`;
+    item.innerHTML = `
+      <div class="post-date">${m}<br>${y}</div>
+      <div class="post-body">
+        <div class="post-tag">${post.tags[0] || ''}</div>
+        <div class="post-title">${post.title}${post.private ? ' 🔒' : ''}</div>
+        <div class="post-excerpt">${post.excerpt}</div>
+      </div>`;
+    item.addEventListener('click', () => openPost(post.id));
+    list.appendChild(item);
+  });
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.post-item').forEach(el => io.observe(el));
+}
+
+async function openPost(id) {
+  const postView = document.getElementById('post-view');
+  const pvBody = document.getElementById('pv-body');
+  const pvNotice = document.getElementById('pv-lang-notice');
+  pvBody.innerHTML = `<div class="loading-state">${u().loading}</div>`;
+  pvNotice.style.display = 'none';
+  postView.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  postView.scrollTop = 0;
+
+  try {
+    const res = await fetch(`/api/posts/${id}?workspace=life&lang=${currentLang}`);
+    if (res.status === 403) {
+      pvBody.innerHTML = '';
+      pendingPrivatePostId = id;
+      document.getElementById('private-overlay').classList.add('open');
+      setTimeout(() => document.getElementById('private-pw').focus(), 100);
+      return;
+    }
+    if (!res.ok) throw new Error();
+    const post = await res.json();
+    renderOpenPost(post);
+  } catch {
+    pvBody.innerHTML = `<div class="empty-state">${currentLang === 'en' ? 'Failed to load post.' : 'Không thể tải nội dung bài viết.'}</div>`;
+  }
+
+  postView.addEventListener('scroll', onScroll);
+}
+
+function renderOpenPost(post) {
+  const pvBody = document.getElementById('pv-body');
+  const pvNotice = document.getElementById('pv-lang-notice');
+  pvNotice.style.display = 'none';
+
+  document.getElementById('pv-meta').innerHTML =
+    `<span class="pv-meta-item">${u().author}</span>
+     <span class="pv-meta-sep">·</span>
+     <span class="pv-meta-item">${formatDate(post.date, post.lang)}</span>
+     <span class="pv-meta-sep">·</span>
+     <span class="pv-meta-item">${u().readTime(post.readTime)}</span>`;
+
+  if (post.requestedLang !== post.lang) {
+    pvNotice.style.display = 'block';
+    pvNotice.innerHTML = u().langNoticePost;
+  }
+
+  renderContent(pvBody, post.content);
+}
+
+function onScroll() {
+  const pv = document.getElementById('post-view');
+  const pct = (pv.scrollTop / (pv.scrollHeight - pv.clientHeight)) * 100;
+  document.getElementById('post-progress').style.width = pct + '%';
+}
+
+function closePost() {
+  const pv = document.getElementById('post-view');
+  pv.classList.remove('open');
+  pv.removeEventListener('scroll', onScroll);
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePost(); });
+
+applyUILang(currentLang);
+updateLangUI();
+loadPosts();
+</script>
+</body>
+</html>
