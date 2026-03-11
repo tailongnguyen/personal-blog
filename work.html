@@ -580,7 +580,7 @@ nav {
 }
 
 /* Article body */
-.pv-body { font-size: 16px; line-height: 1.85; color: var(--text-dim); }
+.pv-body { font-size: 16px; line-height: 1.85; color: var(--text-dim); overflow-x: hidden; }
 .pv-body > p:first-child { font-size: 18px; color: var(--text); line-height: 1.7; }
 .pv-body p { margin-bottom: 24px; }
 
@@ -641,6 +641,35 @@ nav {
 }
 
 .pv-body strong { color: var(--text); }
+
+.pv-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 28px auto;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.pv-body figure.post-figure {
+  margin: 32px 0;
+  text-align: center;
+}
+.pv-body figure.post-figure img {
+  margin: 0 auto;
+}
+.pv-body figure.post-figure figcaption {
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.pv-body figure.post-figure figcaption::before {
+  content: '// ';
+  color: var(--green);
+  opacity: 0.5;
+}
 
 /* Inline HTML components from post content */
 .mini-timeline {
@@ -841,6 +870,12 @@ footer a:hover { opacity: 1; }
 <script>
 marked.setOptions({ breaks: true });
 
+function addImageCaptions(html) {
+  return html.replace(/<img([^>]+)title="([^"]+)"([^>]*)>/gi, (imgTag, _before, caption) => {
+    return `<figure class="post-figure">${imgTag}<figcaption>${caption}</figcaption></figure>`;
+  });
+}
+
 function renderContent(pvBody, content) {
   const trimmed = (content || '').trimStart().toLowerCase();
   const isFullHtml = trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');
@@ -857,7 +892,7 @@ function renderContent(pvBody, content) {
     };
     pvBody.appendChild(iframe);
   } else {
-    pvBody.innerHTML = marked.parse(content || '');
+    pvBody.innerHTML = addImageCaptions(marked.parse(content || ''));
   }
 }
 

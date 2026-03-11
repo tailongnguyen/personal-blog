@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,24 @@ const SUPPORTED_LANGS = ['vi', 'en'];
 
 const DATA_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, Date.now().toString(36) + Math.random().toString(36).substr(2, 5) + ext);
+    }
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|png|gif|webp|svg\+xml)$/.test(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image files allowed'));
+  }
+});
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
@@ -279,6 +298,32 @@ app.delete('/api/admin/posts/:id', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Post not found' });
   }
   writePosts(workspace, filtered);
+  res.json({ success: true });
+});
+
+// ── Image API ──
+app.post('/api/admin/images', requireAuth, upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  res.json({ url: `/uploads/${req.file.filename}`, filename: req.file.filename });
+});
+
+app.get('/api/admin/images', requireAuth, (req, res) => {
+  try {
+    const files = fs.readdirSync(UPLOADS_DIR)
+      .filter(f => /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f))
+      .map(f => ({ filename: f, url: `/uploads/${f}`, mtime: fs.statSync(path.join(UPLOADS_DIR, f)).mtimeMs }))
+      .sort((a, b) => b.mtime - a.mtime);
+    res.json(files);
+  } catch {
+    res.json([]);
+  }
+});
+
+app.delete('/api/admin/images/:filename', requireAuth, (req, res) => {
+  const filename = path.basename(req.params.filename);
+  const filepath = path.join(UPLOADS_DIR, filename);
+  if (!fs.existsSync(filepath)) return res.status(404).json({ error: 'Not found' });
+  fs.unlinkSync(filepath);
   res.json({ success: true });
 });
 

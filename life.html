@@ -478,7 +478,7 @@ nav {
 }
 
 /* Post body rendered from markdown */
-.pv-body { font-size: 18px; line-height: 1.85; color: var(--ink-light); }
+.pv-body { font-size: 18px; line-height: 1.85; color: var(--ink-light); overflow-x: hidden; }
 .pv-body > p:first-child { font-size: 20px; font-style: italic; color: var(--ink); }
 .pv-body p { margin-bottom: 24px; }
 .pv-body blockquote {
@@ -505,6 +505,29 @@ nav {
   background: var(--paper-warm);
   padding: 2px 6px;
   border-radius: 3px;
+}
+
+.pv-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 28px auto;
+  border-radius: 8px;
+}
+
+.pv-body figure.post-figure {
+  margin: 32px 0;
+  text-align: center;
+}
+.pv-body figure.post-figure img {
+  margin: 0 auto;
+}
+.pv-body figure.post-figure figcaption {
+  margin-top: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-faint);
 }
 
 /* ── FOOTER ── */
@@ -696,6 +719,12 @@ footer {
 <script>
 marked.setOptions({ breaks: true });
 
+function addImageCaptions(html) {
+  return html.replace(/<img([^>]+)title="([^"]+)"([^>]*)>/gi, (imgTag, _before, caption) => {
+    return `<figure class="post-figure">${imgTag}<figcaption>${caption}</figcaption></figure>`;
+  });
+}
+
 function renderContent(pvBody, content) {
   const trimmed = (content || '').trimStart().toLowerCase();
   const isFullHtml = trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');
@@ -712,7 +741,7 @@ function renderContent(pvBody, content) {
     };
     pvBody.appendChild(iframe);
   } else {
-    pvBody.innerHTML = marked.parse(content || '');
+    pvBody.innerHTML = addImageCaptions(marked.parse(content || ''));
   }
 }
 

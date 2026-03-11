@@ -249,7 +249,9 @@ body {
 /* Main content area */
 .main-content {
   flex: 1;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg);
 }
 
@@ -639,6 +641,9 @@ tr:hover td { background: var(--surface2); }
   font-size: 15px;
   line-height: 1.8;
   color: var(--text-dim);
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 .md-preview.visible { display: block; }
 .md-preview h1, .md-preview h2 { color: var(--text); font-family: 'Syne', sans-serif; margin: 24px 0 12px; }
@@ -646,9 +651,13 @@ tr:hover td { background: var(--surface2); }
 .md-preview p { margin-bottom: 16px; }
 .md-preview blockquote { border-left: 2px solid var(--green); padding: 4px 0 4px 16px; margin: 16px 0; color: rgba(0,255,136,0.6); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
 .md-preview code { background: var(--surface); border: 1px solid var(--border); padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--blue); }
-.md-preview pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 16px 0; overflow-x: auto; }
+.md-preview pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin: 16px 0; overflow-x: auto; max-width: 100%; white-space: pre-wrap; word-break: break-word; }
 .md-preview pre code { background: none; border: none; padding: 0; color: var(--text); }
 .md-preview strong { color: var(--text); }
+.md-preview img { max-width: 100%; height: auto; display: block; margin: 16px auto; border-radius: 6px; }
+.md-preview figure.post-figure { margin: 20px 0; text-align: center; }
+.md-preview figure.post-figure img { margin: 0 auto; }
+.md-preview figure.post-figure figcaption { margin-top: 8px; font-size: 12px; color: var(--text-muted); font-style: italic; }
 
 /* Toggle */
 .toggle-row {
@@ -876,6 +885,178 @@ tr:hover td { background: var(--surface2); }
   line-height: 1;
 }
 .html-mode-badge button:hover { color: var(--red); }
+
+/* ── IMAGE PICKER MODAL ── */
+.img-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+}
+.img-modal-overlay.open { display: flex; }
+.img-modal {
+  width: 640px;
+  max-height: 80vh;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.img-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.img-modal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+.img-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+.img-modal-close:hover { color: var(--text); }
+.img-modal-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.img-drop-zone {
+  border: 2px dashed var(--border-dim);
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg);
+}
+.img-drop-zone:hover, .img-drop-zone.drag-over {
+  border-color: var(--blue);
+  background: rgba(88,166,255,0.05);
+}
+.img-drop-zone-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.img-drop-zone-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+.img-url-row {
+  display: flex;
+  gap: 8px;
+}
+.img-url-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  outline: none;
+}
+.img-url-input:focus { border-color: var(--blue); }
+.img-url-input::placeholder { color: var(--text-muted); }
+.img-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.img-library {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.img-library-item {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  position: relative;
+  background: var(--bg);
+}
+.img-library-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.img-library-item:hover { border-color: var(--blue); }
+.img-library-item.selected { border-color: var(--green); }
+.img-library-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  color: var(--red);
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.img-library-item:hover .img-library-del { display: flex; }
+.img-modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.img-alt-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.img-alt-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.img-uploading {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 8px;
+}
+
+/* Image tool button */
+.md-tool-img {
+  color: var(--green) !important;
+  border-color: rgba(63,185,80,0.25) !important;
+}
+.md-tool-img:hover {
+  background: rgba(63,185,80,0.1) !important;
+  border-color: rgba(63,185,80,0.5) !important;
+}
 
 .md-toolbar.html-mode {
   opacity: 0.35;
@@ -1139,6 +1320,7 @@ tr:hover td { background: var(--surface2); }
                     <div class="md-sep"></div>
                     <button class="md-tool" onclick="mdInsert('- ', '')">List</button>
                     <button class="md-tool" onclick="mdInsert('---\n', '')">HR</button>
+                    <button class="md-tool md-tool-img" onclick="openImagePicker()" title="Chèn ảnh">🖼 Img</button>
                     <div class="md-sep"></div>
                     <button class="md-tool md-tool-upload" onclick="triggerFileUpload()" title="Import từ file .md, .html, .docx">↑ Import file</button>
                   </div>
@@ -1257,6 +1439,55 @@ tr:hover td { background: var(--surface2); }
 
 <!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
+
+<!-- Image Picker Modal -->
+<div class="img-modal-overlay" id="img-modal-overlay">
+  <div class="img-modal">
+    <div class="img-modal-header">
+      <span class="img-modal-title">// insert image</span>
+      <button class="img-modal-close" onclick="closeImagePicker()">×</button>
+    </div>
+    <div class="img-modal-body">
+      <div>
+        <div class="img-section-label">Upload ảnh</div>
+        <div class="img-drop-zone" id="img-drop-zone"
+             onclick="document.getElementById('img-file-input').click()"
+             ondragover="imgDragOver(event)" ondragleave="imgDragLeave(event)" ondrop="imgDrop(event)">
+          <div class="img-drop-zone-text">Kéo thả ảnh vào đây hoặc click để chọn file</div>
+          <div class="img-drop-zone-sub">JPG · PNG · GIF · WEBP · SVG — tối đa 10MB</div>
+        </div>
+        <div class="img-uploading" id="img-uploading" style="display:none">// đang tải ảnh lên...</div>
+      </div>
+      <div>
+        <div class="img-section-label">Dán URL ảnh ngoài</div>
+        <div class="img-url-row">
+          <input type="text" class="img-url-input" id="img-url-input" placeholder="https://...">
+          <button class="btn btn-secondary" onclick="insertImageFromUrl()" style="flex-shrink:0">Chèn</button>
+        </div>
+      </div>
+      <div>
+        <div class="img-section-label">Thư viện ảnh <span id="img-lib-count" style="color:var(--text-muted)"></span></div>
+        <div class="img-library" id="img-library">
+          <div class="img-uploading">// đang tải thư viện...</div>
+        </div>
+      </div>
+    </div>
+    <div class="img-modal-footer">
+      <div style="flex:1;display:flex;gap:10px;align-items:center">
+        <div class="img-alt-row" style="flex:1">
+          <span class="img-alt-label">Alt:</span>
+          <input type="text" class="img-url-input" id="img-alt-input" placeholder="accessibility text">
+        </div>
+        <div class="img-alt-row" style="flex:2">
+          <span class="img-alt-label">Caption:</span>
+          <input type="text" class="img-url-input" id="img-caption-input" placeholder="chú thích hiển thị dưới ảnh">
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="closeImagePicker()" style="flex-shrink:0">Hủy</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="img-file-input" accept="image/*" style="display:none" onchange="imgFileSelected(event)">
 
 <script>
 marked.setOptions({ breaks: true });
@@ -1759,6 +1990,7 @@ async function openEditor(postId, workspace) {
   renderTagChips();
   onWorkspaceChange();
   showPanel('editor');
+  initTextareaDrop();
 }
 
 function onWorkspaceChange() {
@@ -1888,7 +2120,7 @@ function switchMdTab(tab, btn) {
       preview.appendChild(iframe);
     } else {
       preview.style.padding = '';
-      preview.innerHTML = marked.parse(content || '*nội dung trống*');
+      preview.innerHTML = addImageCaptions(marked.parse(content || '*nội dung trống*'));
     }
   } else {
     textarea.style.display = 'block';
@@ -1907,6 +2139,164 @@ function mdInsert(before, after) {
   ta.focus();
   ta.selectionStart = start + before.length;
   ta.selectionEnd = start + before.length + sel.length;
+}
+
+function addImageCaptions(html) {
+  return html.replace(/<img([^>]+)title="([^"]+)"([^>]*)>/gi, (imgTag, _before, caption) => {
+    return `<figure class="post-figure">${imgTag}<figcaption>${caption}</figcaption></figure>`;
+  });
+}
+
+// ── Image Picker ──
+let selectedImageUrl = '';
+
+function openImagePicker() {
+  selectedImageUrl = '';
+  document.getElementById('img-url-input').value = '';
+  document.getElementById('img-alt-input').value = '';
+  document.getElementById('img-caption-input').value = '';
+  document.getElementById('img-modal-overlay').classList.add('open');
+  loadImageLibrary();
+}
+
+function closeImagePicker() {
+  document.getElementById('img-modal-overlay').classList.remove('open');
+}
+
+function imgDragOver(e) {
+  e.preventDefault();
+  document.getElementById('img-drop-zone').classList.add('drag-over');
+}
+
+function imgDragLeave(e) {
+  document.getElementById('img-drop-zone').classList.remove('drag-over');
+}
+
+function imgDrop(e) {
+  e.preventDefault();
+  document.getElementById('img-drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) uploadImageFile(file);
+}
+
+function imgFileSelected(e) {
+  const file = e.target.files[0];
+  if (file) uploadImageFile(file);
+  e.target.value = '';
+}
+
+async function uploadImageFile(file) {
+  const uploadEl = document.getElementById('img-uploading');
+  uploadEl.style.display = 'block';
+  uploadEl.textContent = `// uploading ${file.name}...`;
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    const res = await fetch('/api/admin/images', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('Upload failed');
+    const data = await res.json();
+    uploadEl.style.display = 'none';
+    toast('success', 'Ảnh đã tải lên');
+    insertImageSyntax(data.url);
+    loadImageLibrary();
+  } catch (err) {
+    uploadEl.style.display = 'none';
+    toast('error', 'Lỗi tải ảnh: ' + err.message);
+  }
+}
+
+function insertImageFromUrl() {
+  const url = document.getElementById('img-url-input').value.trim();
+  if (!url) return;
+  insertImageSyntax(url);
+}
+
+function insertImageSyntax(url) {
+  const alt = document.getElementById('img-alt-input').value.trim() || 'image';
+  const caption = document.getElementById('img-caption-input').value.trim();
+  const syntax = caption ? `![${alt}](${url} "${caption}")` : `![${alt}](${url})`;
+  closeImagePicker();
+  mdInsert(syntax, '');
+}
+
+async function loadImageLibrary() {
+  const lib = document.getElementById('img-library');
+  const countEl = document.getElementById('img-lib-count');
+  lib.innerHTML = '<div class="img-uploading">// đang tải thư viện...</div>';
+  try {
+    const res = await fetch('/api/admin/images');
+    if (!res.ok) throw new Error();
+    const images = await res.json();
+    countEl.textContent = `(${images.length})`;
+    if (images.length === 0) {
+      lib.innerHTML = '<div class="img-uploading" style="grid-column:1/-1">// chưa có ảnh nào</div>';
+      return;
+    }
+    lib.innerHTML = '';
+    images.forEach(img => {
+      const item = document.createElement('div');
+      item.className = 'img-library-item';
+      item.innerHTML = `<img src="${img.url}" alt="${img.filename}" loading="lazy">
+        <button class="img-library-del" onclick="deleteLibraryImg(event,'${img.filename}')">×</button>`;
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.img-library-del')) return;
+        insertImageSyntax(img.url);
+      });
+      lib.appendChild(item);
+    });
+  } catch {
+    lib.innerHTML = '<div class="img-uploading" style="grid-column:1/-1">// không thể tải thư viện</div>';
+  }
+}
+
+async function deleteLibraryImg(e, filename) {
+  e.stopPropagation();
+  if (!confirm(`Xóa ảnh ${filename}?`)) return;
+  try {
+    await fetch(`/api/admin/images/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+    loadImageLibrary();
+  } catch {
+    toast('error', 'Không thể xóa ảnh');
+  }
+}
+
+// Direct drag-drop onto textarea
+function initTextareaDrop() {
+  const ta = document.getElementById('ed-content');
+  if (!ta) return;
+  ta.addEventListener('dragover', e => {
+    if (e.dataTransfer.types.includes('Files')) e.preventDefault();
+  });
+  ta.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      e.preventDefault();
+      uploadImageFileDirect(file);
+    }
+  });
+}
+
+async function uploadImageFileDirect(file) {
+  const ta = document.getElementById('ed-content');
+  const placeholder = `![uploading ${file.name}...]()`;
+  const pos = ta.selectionStart;
+  ta.value = ta.value.substring(0, pos) + placeholder + ta.value.substring(pos);
+  ta.focus();
+
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    const res = await fetch('/api/admin/images', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('Upload failed');
+    const data = await res.json();
+    const alt = file.name.replace(/\.[^.]+$/, '');
+    ta.value = ta.value.replace(placeholder, `![${alt}](${data.url})`);
+    onEditorInput();
+    toast('success', 'Ảnh đã chèn');
+  } catch (err) {
+    ta.value = ta.value.replace(placeholder, '');
+    toast('error', 'Lỗi tải ảnh: ' + err.message);
+  }
 }
 
 // ── Tags ──
